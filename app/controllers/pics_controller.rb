@@ -1,6 +1,7 @@
 class PicsController < ApplicationController
-	before_action :find_pic, only: [:show, :edit, :update, :destroy, :upvote]
+	before_action :find_pic, only: [:show, :edit, :destroy, :update, :upvote]
 	before_action :authenticate_user!, except: [:index, :show]
+	before_action :require_permission, only: [:edit, :destroy]
 	def index
 		@pics = Pic.all.order("created_at DESC")
 	end
@@ -51,5 +52,11 @@ class PicsController < ApplicationController
 
 	def find_pic
 		@pic = Pic.find(params[:id])
+	end
+
+	def require_permission
+  	if current_user != Pic.find(params[:id]).user
+    	redirect_to :back, notice: "You cannot edit/delete this!!"
+  	end
 	end
 end
